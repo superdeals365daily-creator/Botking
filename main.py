@@ -3,24 +3,29 @@ import requests
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")
-CUELINKS_TOKEN = os.getenv("CUELINKS_TOKEN")
+CUELINKS_API_TOKEN = os.getenv("CUELINKS_TOKEN")  # Real API token
 
-# Function to fetch top deals from Cuelinks
+# Categories you want to fetch deals for
+CATEGORIES = [
+    "Shopping", "Grocery", "Food", "Rides", 
+    "Insurance", "Medical", "Flights/Hotels"
+]
+
 def fetch_deals():
-    headers = {"Authorization": f"Bearer {CUELINKS_TOKEN}"}
-    categories = ["Shopping", "Grocery", "Food", "Rides", "Insurance", "Medical", "Flights/Hotels"]
+    headers = {"Authorization": f"Bearer {CUELINKS_API_TOKEN}"}
     all_deals = []
 
-    for category in categories:
+    for category in CATEGORIES:
         try:
-            url = f"https://api.cuelinks.com/v2/campaigns.json"
+            # Example real API endpoint (update according to Cuelinks API docs)
+            url = "https://api.cuelinks.com/v2/campaigns.json"
             params = {
-                "sort_column": "id",
-                "sort_direction": "asc",
+                "search_term": category,
                 "page": 1,
                 "per_page": 5,
-                "search_term": category,
-                "country_id": 1
+                "country_id": 1,
+                "sort_column": "id",
+                "sort_direction": "asc"
             }
             response = requests.get(url, headers=headers, params=params)
             response.raise_for_status()
@@ -37,7 +42,6 @@ def fetch_deals():
 
     return all_deals
 
-# Function to post deals to Telegram
 def post_to_telegram(deals):
     for deal in deals:
         try:
