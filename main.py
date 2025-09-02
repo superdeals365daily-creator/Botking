@@ -8,30 +8,34 @@ CUELINKS_TOKEN = os.getenv("CUELINKS_TOKEN")
 # Function to fetch top deals from Cuelinks
 def fetch_deals():
     headers = {"Authorization": f"Bearer {CUELINKS_TOKEN}"}
-    try:
-        url = "https://api.cuelinks.com/v2/campaigns.json"
-        params = {
-            "sort_column": "id",
-            "sort_direction": "asc",
-            "page": 1,
-            "per_page": 10,
-            "search_term": "",
-            "country_id": 1
-        }
-        response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()
-        data = response.json()
-        deals = []
-        for item in data.get("campaigns", []):
-            deals.append({
-                "title": item.get("name"),
-                "affiliate_link": item.get("url"),
-                "image_url": item.get("image_url")
-            })
-        return deals
-    except Exception as e:
-        print("Error fetching deals:", e)
-        return []
+    categories = ["Shopping", "Grocery", "Food", "Rides", "Insurance", "Medical", "Flights/Hotels"]
+    all_deals = []
+
+    for category in categories:
+        try:
+            url = f"https://api.cuelinks.com/v2/campaigns.json"
+            params = {
+                "sort_column": "id",
+                "sort_direction": "asc",
+                "page": 1,
+                "per_page": 5,
+                "search_term": category,
+                "country_id": 1
+            }
+            response = requests.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+            for item in data.get("campaigns", []):
+                deal = {
+                    "title": item.get("name"),
+                    "affiliate_link": item.get("url"),
+                    "image_url": item.get("image_url")
+                }
+                all_deals.append(deal)
+        except Exception as e:
+            print(f"Error fetching {category} deals:", e)
+
+    return all_deals
 
 # Function to post deals to Telegram
 def post_to_telegram(deals):
